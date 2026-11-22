@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:everrent;DB_CLOSE_DELAY=-1 # H2 인메모리 DB
+    username: sa # H2 기본 계정명
+    password:    # 비밀번호 없음 (공백)
+
+  jpa:
+    hibernate:
+      ddl-auto: update # Entity 작성 시 테이블 자동 생성/수정
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+    open-in-view: false
+    # 👇 JPA가 테이블을 만든 뒤 data.sql을 실행하도록 지연시키는 설정
+    defer-datasource-initialization: true
+
+  # 👇 아래 설정을 추가해주세요!
+  sql:
+    init:
+      mode: always # 항상 data.sql 실행 (또는 embedded)
+
+
+  h2:
+    console:
+      enabled: true       # 웹 브라우저에서 H2 콘솔 사용 허용
+      path: /h2-console   # 접속 주소: http://localhost:8080/h2-console
+
+logging:
+  level:
+    org.hibernate.SQL: debug

@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.0' // 스프링 버전 3.4.0
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.everrent'
+version = '0.1'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)  // 자바 버전 : 17
+    }
+}
+
+// 어노테이션 프로세서(Lombok 등)가 생성하는 코드를 컴파일 단계에서 바로 참조할 수 있도록 의존성 설정을 상속해 주는 기능
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Web & REST API
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // DB (JPA & MySQL)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.mysql:mysql-connector-j' // MySQL 드라이버 (필수)
+
+    // 테스트용 인메모리 DB 의존성
+    runtimeOnly 'com.h2database:h2'
+
+    // DTO 입력값 검증 (@NotBlank, @NotNull 등)
+    implementation 'org.springframework.boot:spring-boot-starter-validation' // 유효성 검증용 (필수)
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test 할때 사용하는 의존성
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 인텔리제이 내부에서 테스트용으로 사용 @test
+tasks.named('test') {
+    useJUnitPlatform()
+}
