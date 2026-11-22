@@ -19,9 +19,9 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    /**
-     * 1. 물품 등록 API
-     * POST /api/items
+     /*
+     1. 물품 등록 API
+     POST /api/items
      */
     @PostMapping
     public ResponseEntity<ItemResponse> createItem(
