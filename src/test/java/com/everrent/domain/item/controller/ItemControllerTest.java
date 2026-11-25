@@ -4,15 +4,27 @@ import com.everrent.domain.category.entity.Category;
 import com.everrent.domain.category.repository.CategoryRepository;
 import com.everrent.domain.item.entity.Item;
 import com.everrent.domain.item.repository.ItemRepository;
+import com.everrent.domain.user.entity.User;
+import com.everrent.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc
 @SpringBootTest
 class ItemControllerTest {
 
@@ -21,6 +33,65 @@ class ItemControllerTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+
+    Category category;
+    User owner;
+    @BeforeEach
+    void setUp() {
+        category = categoryRepository.save(Category.builder()
+                .name("장비")
+                .build());
+
+        owner = userRepository.save(User.builder()
+                .username("1")
+                .password("1234")
+                .nickname("닉네임1")
+                .phone("010-0000-0000")
+                .build());
+    }
+
+    @Test
+    @DisplayName("CRUD 테스트 - 전체 물품 조회")
+    @Transactional
+    void findAllItems() throws Exception {
+        // 1. Given 준비
+        Item item = Item.builder()
+                .title("캠핑 텐트")
+                .pricePerDay(50000)
+                .description("상태 좋은 텐트 대여합니다.")
+                .owner(owner)
+                .category(category)
+                .build();
+
+        Item item2 = Item.builder()
+                .title("가스 버너")
+                .pricePerDay(20000)
+                .description("상태 좋은 가스 버너 대여합니다.")
+                .owner(owner)
+                .category(category)
+                .build();
+
+        Item savedItem = itemRepository.save(item);
+        Item savedItem2 = itemRepository.save(item2);
+
+        // 2. When 실행
+        ResultActions result = mockMvc.perform(get("/api/items"));
+
+        // 3. then 검증
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].title").value(
+                        org.hamcrest.Matchers.containsInAnyOrder("캠핑 텐트", "가스 버너")
+                ));
+    }
+
 
     @Test
     @DisplayName("더티 체킹(변경 감지) 테스트")
